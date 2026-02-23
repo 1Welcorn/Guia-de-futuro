@@ -47,6 +47,7 @@ const App = () => {
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [allResults, setAllResults] = useState<any[]>([]);
   const [adminFilter, setAdminFilter] = useState<string>('all');
+  const [showConsolidated, setShowConsolidated] = useState(false);
   const isAdminUser = userInfo.email.toLowerCase() === 'f4330252301@gmail.com';
 
   useEffect(() => {
@@ -155,9 +156,25 @@ const App = () => {
     };
   }, [scores, answers]);
 
-  const calculateResult = (): Profile => {
-    return profiles[analysisMetrics.primary];
-  };
+  const consolidatedStats = useMemo(() => {
+    if (!allResults.length) return null;
+    
+    const counts = { a: 0, b: 0, c: 0, d: 0 };
+    allResults.forEach(res => {
+      if (res.profile && counts[res.profile as keyof typeof counts] !== undefined) {
+        counts[res.profile as keyof typeof counts]++;
+      }
+    });
+
+    const data = [
+      { name: 'Explorador', value: counts.a, color: '#F27D26' },
+      { name: 'Líder', value: counts.b, color: '#2563EB' },
+      { name: 'Conector', value: counts.c, color: '#10B981' },
+      { name: 'Inovador', value: counts.d, color: '#4F46E5' },
+    ].filter(d => d.value > 0);
+
+    return { counts, data, total: allResults.length };
+  }, [allResults]);
 
   const radarData = useMemo(() => {
     return [
@@ -593,7 +610,15 @@ const App = () => {
                 {/* Stored Results Table */}
                 <div className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
                   <div className="p-4 border-bottom border-stone-100 bg-stone-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <h3 className="text-sm font-bold text-stone-800 uppercase tracking-wider">Histórico de Testes ({allResults.length})</h3>
+                    <div className="flex items-center gap-3">
+                      <h3 className="text-sm font-bold text-stone-800 uppercase tracking-wider">Histórico de Testes ({allResults.length})</h3>
+                      <button 
+                        onClick={() => setShowConsolidated(!showConsolidated)}
+                        className={`text-[10px] font-bold px-3 py-1 rounded-full transition-all ${showConsolidated ? 'bg-brand-primary text-white' : 'bg-stone-200 text-stone-500 hover:bg-stone-300'}`}
+                      >
+                        {showConsolidated ? 'Ver Tabela' : 'Ver Consolidado'}
+                      </button>
+                    </div>
                     <div className="flex items-center gap-2">
                       <label className="text-[10px] font-bold text-stone-400 uppercase">Filtrar:</label>
                       <select 
@@ -609,39 +634,95 @@ const App = () => {
                       </select>
                     </div>
                   </div>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs">
-                      <thead className="bg-stone-50 text-stone-400 uppercase font-bold">
-                        <tr>
-                          <th className="px-4 py-3">Nome</th>
-                          <th className="px-4 py-3">Email</th>
-                          <th className="px-4 py-3">Perfil</th>
-                          <th className="px-4 py-3">Data</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-stone-100">
-                        {allResults
-                          .filter(res => adminFilter === 'all' || res.profile === adminFilter)
-                          .map((res, idx) => (
-                          <tr key={idx} className="hover:bg-stone-50 transition-colors">
-                            <td className="px-4 py-3 font-bold text-stone-700">{res.name}</td>
-                            <td className="px-4 py-3 text-stone-500">{res.email}</td>
-                            <td className="px-4 py-3">
-                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold text-white ${profiles[res.profile as 'a'|'b'|'c'|'d']?.color || 'bg-stone-300'}`}>
-                                {profiles[res.profile as 'a'|'b'|'c'|'d']?.title || 'N/A'}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3 text-stone-400">{new Date(res.timestamp).toLocaleDateString()}</td>
-                          </tr>
-                        ))}
-                        {allResults.length === 0 && (
+
+                  {showConsolidated && consolidatedStats ? (
+                    <div className="p-6 md:p-8 space-y-8 print:block">
+                      <div className="text-center space-y-2">
+                        <h2 className="text-2xl font-black text-brand-secondary">Relatório Consolidado de Turma</h2>
+                        <p className="text-stone-400 text-sm">Análise de {consolidatedStats.total} participantes</p>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                        <div className="h-64">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={consolidatedStats.data}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={60}
+                                outerRadius={80}
+                                paddingAngle={5}
+                                dataKey="value"
+                              >
+                                {consolidatedStats.data.map((entry, index) => (
+                                  <Cell key={`cell-${index}`} fill={entry.color} />
+                                ))}
+                              </Pie>
+                              <RechartsTooltip />
+                            </PieChart>
+                          </ResponsiveContainer>
+                        </div>
+                        <div className="space-y-4">
+                          {consolidatedStats.data.map((item, idx) => (
+                            <div key={idx} className="flex items-center justify-between p-3 bg-stone-50 rounded-xl">
+                              <div className="flex items-center gap-3">
+                                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                                <span className="font-bold text-stone-700">{item.name}</span>
+                              </div>
+                              <div className="flex items-center gap-4">
+                                <span className="text-stone-400 font-medium">{item.value} alunos</span>
+                                <span className="text-brand-primary font-black">{Math.round((item.value / consolidatedStats.total) * 100)}%</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="pt-6 border-t border-stone-100 flex justify-center no-print">
+                        <button 
+                          onClick={() => window.print()}
+                          className="flex items-center gap-2 bg-brand-secondary text-white px-6 py-3 rounded-xl font-bold hover:bg-brand-primary transition-all"
+                        >
+                          <Printer size={18} /> Imprimir Consolidado
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-xs">
+                        <thead className="bg-stone-50 text-stone-400 uppercase font-bold">
                           <tr>
-                            <td colSpan={4} className="px-4 py-8 text-center text-stone-400 italic">Nenhum resultado armazenado ainda.</td>
+                            <th className="px-4 py-3">Nome</th>
+                            <th className="px-4 py-3">Email</th>
+                            <th className="px-4 py-3">Perfil</th>
+                            <th className="px-4 py-3">Data</th>
                           </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
+                        </thead>
+                        <tbody className="divide-y divide-stone-100">
+                          {allResults
+                            .filter(res => adminFilter === 'all' || res.profile === adminFilter)
+                            .map((res, idx) => (
+                            <tr key={idx} className="hover:bg-stone-50 transition-colors">
+                              <td className="px-4 py-3 font-bold text-stone-700">{res.name}</td>
+                              <td className="px-4 py-3 text-stone-500">{res.email}</td>
+                              <td className="px-4 py-3">
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold text-white ${profiles[res.profile as 'a'|'b'|'c'|'d']?.color || 'bg-stone-300'}`}>
+                                  {profiles[res.profile as 'a'|'b'|'c'|'d']?.title || 'N/A'}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-stone-400">{new Date(res.timestamp).toLocaleDateString()}</td>
+                            </tr>
+                          ))}
+                          {allResults.length === 0 && (
+                            <tr>
+                              <td colSpan={4} className="px-4 py-8 text-center text-stone-400 italic">Nenhum resultado armazenado ainda.</td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

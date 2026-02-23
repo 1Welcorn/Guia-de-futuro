@@ -257,8 +257,15 @@ const App = () => {
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.2 }}
               >
-                <div className="flex items-center justify-center lg:justify-start gap-2 mb-6">
-                  <div className="w-10 h-10 bg-brand-primary rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-brand-primary/20">
+                <div className="flex items-center justify-center lg:justify-start gap-2 mb-6 relative">
+                  <div 
+                    className="w-10 h-10 bg-brand-primary rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-brand-primary/20 cursor-pointer"
+                    onClick={() => {
+                      setUserInfo({ name: 'Admin', email: 'f4330252301@gmail.com' });
+                      setStep('result');
+                    }}
+                    title="Acesso Rápido Admin"
+                  >
                     G
                   </div>
                   <span className="font-display font-black text-xl md:text-2xl tracking-tighter text-brand-secondary">Guia de <span className="text-brand-primary">Futuro</span></span>
@@ -366,7 +373,20 @@ const App = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] md:text-xs font-black text-stone-400 uppercase tracking-[0.2em] ml-1">E-mail</label>
+                <div className="flex justify-between items-center">
+                  <label className="text-[10px] md:text-xs font-black text-stone-400 uppercase tracking-[0.2em] ml-1">E-mail</label>
+                  {isAdminUser && (
+                    <button 
+                      onClick={() => {
+                        setStep('result');
+                        setIsAdminMode(true);
+                      }}
+                      className="text-[8px] font-bold text-brand-primary hover:underline uppercase tracking-widest"
+                    >
+                      Entrar como Admin
+                    </button>
+                  )}
+                </div>
                 <input 
                   type="email" 
                   value={userInfo.email}

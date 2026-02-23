@@ -340,6 +340,61 @@ export const questions: Question[] = [
       { id: 'c', text: "Um lugar onde eu possa ajudar muitas pessoas" },
       { id: 'd', text: "Um laboratório ou estúdio tecnológico" }
     ]
+  },
+  {
+    id: 31,
+    category: 'skill',
+    text: "Quando você recebe uma tarefa difícil, sua primeira reação é:",
+    options: [
+      { id: 'a', text: "Começar logo e descobrir como fazer no caminho" },
+      { id: 'b', text: "Delegar partes ou organizar um plano de ação" },
+      { id: 'c', text: "Conversar com alguém para trocar ideias" },
+      { id: 'd', text: "Analisar o problema de todos os ângulos antes de começar" }
+    ]
+  },
+  {
+    id: 32,
+    category: 'interest',
+    text: "Qual dessas áreas da tecnologia mais te fascina?",
+    options: [
+      { id: 'a', text: "Drones, câmeras e equipamentos de ação" },
+      { id: 'b', text: "Sistemas de gestão e segurança empresarial" },
+      { id: 'c', text: "Redes sociais e plataformas de ensino" },
+      { id: 'd', text: "Inteligência Artificial e Realidade Virtual" }
+    ]
+  },
+  {
+    id: 33,
+    category: 'personality',
+    text: "Em um final de semana ideal, você prefere:",
+    options: [
+      { id: 'a', text: "Praticar um esporte radical ou viajar para um lugar novo" },
+      { id: 'b', text: "Organizar suas coisas e planejar a semana seguinte" },
+      { id: 'c', text: "Reunir amigos para um jantar ou evento social" },
+      { id: 'd', text: "Ficar em casa lendo, jogando ou aprendendo algo novo" }
+    ]
+  },
+  {
+    id: 34,
+    category: 'skill',
+    text: "Sua forma de resolver conflitos é:",
+    options: [
+      { id: 'a', text: "Sendo direto e prático para resolver logo" },
+      { id: 'b', text: "Apelando para as regras e o que é justo" },
+      { id: 'c', text: "Ouvindo os dois lados e buscando harmonia" },
+      { id: 'd', text: "Analisando os fatos de forma imparcial" }
+    ]
+  },
+  {
+    id: 35,
+    category: 'interest',
+    text: "Se você fosse escrever um livro, o tema seria:",
+    options: [
+      { id: 'a', text: "Um guia de sobrevivência ou aventuras reais" },
+      { id: 'b', text: "Como gerir grandes empresas e pessoas" },
+      { id: 'c', text: "A psicologia por trás das relações humanas" },
+      { id: 'd', text: "O futuro da humanidade e novas tecnologias" }
+    ]
   }
 ];
 
@@ -376,7 +431,7 @@ export const profiles: Record<'a' | 'b' | 'c' | 'd', Profile> = {
     title: "Explorador Dinâmico",
     description: "Prioriza a liberdade de expressão e a agilidade. Alunos cinestésicos que aprendem na prática e evitam monotonia.",
     characteristics: "Audácia, facilidade com o inesperado, praticidade e habilidade para improvisar.",
-    careers: ["Chef de Cozinha", "Piloto", "Jornalista", "Estilista"],
+    careers: ["Chef de Cozinha", "Piloto", "Jornalista", "Estilista", "Fotógrafo de Aventura", "Organizador de Eventos"],
     detailedCareers: [
       {
         name: "Chef de Cozinha",
@@ -398,6 +453,13 @@ export const profiles: Record<'a' | 'b' | 'c' | 'd', Profile> = {
         marketOutlook: "Setor de aviação civil em recuperação e expansão no Brasil, com demanda por novos pilotos em linhas aéreas e aviação executiva.",
         whereToStudy: "Escolas de Aviação Civil, Faculdades de Ciências Aeronáuticas (PUC-RS, Anhembi Morumbi).",
         specializations: ["Aviação Comercial", "Instrução de Voo", "Aviação Agrícola"]
+      },
+      {
+        name: "Fotógrafo de Aventura",
+        dailyActivities: "Captura de imagens em ambientes externos desafiadores, edição digital, planejamento de expedições e venda de licenças para mídias.",
+        marketOutlook: "Crescente com o marketing de experiência e redes sociais. Oportunidades em revistas de viagem, marcas de outdoor e bancos de imagem.",
+        whereToStudy: "Cursos de Fotografia (SENAC, Panamericana), Workshops especializados.",
+        specializations: ["Fotografia de Natureza", "Drone Photography", "Edição Avançada"]
       }
     ],
     techCourses: [
@@ -423,7 +485,7 @@ export const profiles: Record<'a' | 'b' | 'c' | 'd', Profile> = {
     title: "Líder Estratégico",
     description: "Focado em ordem e pragmatismo. Valoriza hierarquia clara e metas tangíveis em grupo.",
     characteristics: "Senso de dever, cautela, responsabilidade e foco em resultados.",
-    careers: ["Administrador", "Advogado", "Engenheiro", "Policial"],
+    careers: ["Administrador", "Advogado", "Engenheiro", "Policial", "Analista de Investimentos", "Gestor de Operações"],
     detailedCareers: [
       {
         name: "Administrador",
@@ -445,6 +507,13 @@ export const profiles: Record<'a' | 'b' | 'c' | 'd', Profile> = {
         marketOutlook: "Essencial em todos os setores, especialmente tecnologia e construção civil. Alta valorização de profissionais certificados.",
         whereToStudy: "Fundação Getúlio Vargas (FGV), SENAC, Institutos Federais.",
         specializations: ["Metodologias Ágeis", "Gestão de Riscos", "PMP"]
+      },
+      {
+        name: "Analista de Investimentos",
+        dailyActivities: "Análise de mercado financeiro, avaliação de empresas, recomendação de compra/venda de ativos e gestão de carteiras.",
+        marketOutlook: "Setor financeiro em constante busca por talentos analíticos. Alta remuneração e bônus por performance.",
+        whereToStudy: "Economia ou Administração (USP, FGV, Insper).",
+        specializations: ["Equity Research", "Wealth Management", "Análise Técnica"]
       }
     ],
     techCourses: [
@@ -470,7 +539,7 @@ export const profiles: Record<'a' | 'b' | 'c' | 'd', Profile> = {
     title: "Conector Humanista",
     description: "Demonstra alta inteligência interpessoal e empatia. Movido por causas sociais e intuição.",
     characteristics: "Idealismo, disposição para compreender os outros, entusiasmo e harmonia.",
-    careers: ["Psicólogo", "Professor", "Escritor", "Sociólogo"],
+    careers: ["Psicólogo", "Professor", "Escritor", "Sociólogo", "Relações Públicas", "Mediador de Conflitos"],
     detailedCareers: [
       {
         name: "Psicólogo",
@@ -492,6 +561,13 @@ export const profiles: Record<'a' | 'b' | 'c' | 'd', Profile> = {
         marketOutlook: "Atuação em órgãos públicos (CRAS, CREAS), ONGs e hospitais. Foco em políticas de inclusão e proteção social.",
         whereToStudy: "Universidades Federais, Institutos Federais, PUC.",
         specializations: ["Gestão de Políticas Públicas", "Saúde da Família", "Direitos da Criança e Adolescente"]
+      },
+      {
+        name: "Relações Públicas",
+        dailyActivities: "Gestão da imagem de empresas ou pessoas, organização de eventos, relacionamento com a mídia e comunicação interna.",
+        marketOutlook: "Essencial para a reputação de marcas no ambiente digital. Alta demanda por gestores de crise e influência.",
+        whereToStudy: "Comunicação Social (USP, Cásper Líbero, PUC).",
+        specializations: ["Comunicação Corporativa", "Gestão de Crise", "Branding"]
       }
     ],
     techCourses: [
@@ -517,7 +593,7 @@ export const profiles: Record<'a' | 'b' | 'c' | 'd', Profile> = {
     title: "Inovador Analítico",
     description: "Reflete uma personalidade curiosa e lógica. Valoriza autonomia intelectual e tecnologia.",
     characteristics: "Engenhosidade, rapidez mental, razão, lógica e curiosidade intelectual.",
-    careers: ["Arquiteto", "Analista de Sistemas", "Físico", "Matemático"],
+    careers: ["Arquiteto", "Analista de Sistemas", "Físico", "Matemático", "UX Designer", "Arquiteto de Cloud"],
     detailedCareers: [
       {
         name: "Analista de Sistemas / Dev",
@@ -539,6 +615,13 @@ export const profiles: Record<'a' | 'b' | 'c' | 'd', Profile> = {
         marketOutlook: "Um dos mercados mais aquecidos do mundo. Alta demanda por profissionais qualificados em diversas linguagens.",
         whereToStudy: "Institutos Federais, USP, UNICAMP, Cursos de Tecnologia (FIAP, Alura).",
         specializations: ["Arquitetura de Sistemas", "Segurança da Informação", "Cloud Computing"]
+      },
+      {
+        name: "UX Designer",
+        dailyActivities: "Pesquisa com usuários, criação de protótipos, testes de usabilidade e design de interfaces centradas no humano.",
+        marketOutlook: "Fundamental para o sucesso de produtos digitais. Alta demanda em empresas de tecnologia e agências.",
+        whereToStudy: "Design ou TI (USP, Belas Artes, Cursos Online como Alura/EBAC).",
+        specializations: ["User Research", "Interaction Design", "Visual Design"]
       }
     ],
     techCourses: [

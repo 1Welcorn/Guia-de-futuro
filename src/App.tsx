@@ -45,7 +45,18 @@ const App = () => {
   const [answers, setAnswers] = useState<Record<number, 'a' | 'b' | 'c' | 'd'>>({});
   const [activeResultTab, setActiveResultTab] = useState<'perfil' | 'relatorio' | 'carreiras' | 'cursos'>('perfil');
   const [isAdminMode, setIsAdminMode] = useState(false);
+  const [allResults, setAllResults] = useState<any[]>([]);
+  const [adminFilter, setAdminFilter] = useState<string>('all');
   const isAdminUser = userInfo.email.toLowerCase() === 'f4330252301@gmail.com';
+
+  useEffect(() => {
+    if (isAdminMode) {
+      fetch('/api/results')
+        .then(res => res.json())
+        .then(data => setAllResults(data))
+        .catch(err => console.error(err));
+    }
+  }, [isAdminMode]);
 
   useEffect(() => {
     if (!isAdminMode && activeResultTab === 'relatorio') {
@@ -56,9 +67,45 @@ const App = () => {
   const progress = (Object.keys(answers).length / questions.length) * 100;
 
   const handleAnswer = (questionId: number, optionId: 'a' | 'b' | 'c' | 'd') => {
-    setAnswers(prev => ({ ...prev, [questionId]: optionId }));
+    const newAnswers = { ...answers, [questionId]: optionId };
+    setAnswers(newAnswers);
+    
     if (currentQuestionIndex < questions.length - 1) {
       setTimeout(() => setCurrentQuestionIndex(prev => prev + 1), 300);
+    } else {
+      // Quiz finished, calculate profile and save
+      const finalScores = calculateScores(newAnswers);
+      const primaryProfile = Object.entries(finalScores).sort(([, a], [, b]) => b - a)[0][0];
+      saveResults(newAnswers, primaryProfile);
+    }
+  };
+
+  const calculateScores = (currentAnswers: Record<number, 'a' | 'b' | 'c' | 'd'>) => {
+    const counts: Record<'a' | 'b' | 'c' | 'd', number> = { a: 0, b: 0, c: 0, d: 0 };
+    const weights = { skill: 1.5, personality: 1.2, interest: 1.0 };
+
+    (Object.entries(currentAnswers) as Array<[string, 'a' | 'b' | 'c' | 'd']>).forEach(([qId, ans]) => {
+      const question = questions.find(q => q.id === parseInt(qId));
+      const weight = question ? weights[question.category] : 1.0;
+      counts[ans] += weight;
+    });
+    return counts;
+  };
+
+  const saveResults = async (finalAnswers: Record<number, 'a' | 'b' | 'c' | 'd'>, profile: string) => {
+    try {
+      await fetch('/api/results', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userInfo,
+          answers: finalAnswers,
+          profile,
+          timestamp: new Date().toISOString()
+        })
+      });
+    } catch (error) {
+      console.error('Failed to save results:', error);
     }
   };
 
@@ -474,22 +521,22 @@ const App = () => {
                   <span className="font-display font-black text-lg md:text-2xl tracking-tighter text-brand-secondary">Guia de <span className="text-brand-primary">Futuro</span></span>
                 </div>
               </div>
-              <div className="absolute -top-2 md:-top-4 -right-2 md:-right-4 flex gap-1 md:gap-2 no-print">
+              <div className="absolute top-0 right-0 flex gap-2 no-print">
                 {isAdminUser && (
                   <button 
                     onClick={() => setIsAdminMode(!isAdminMode)}
-                    className={`p-1.5 md:p-2 transition-colors ${isAdminMode ? 'text-brand-primary' : 'text-stone-300 hover:text-stone-400'}`}
+                    className={`p-2 rounded-full transition-all ${isAdminMode ? 'bg-brand-primary text-white shadow-lg' : 'bg-white text-stone-300 hover:text-brand-primary shadow-sm border border-stone-100'}`}
                     title="Alternar Visão Administrativa"
                   >
-                    <Lock size={14} className="md:w-4 md:h-4" />
+                    <Lock size={16} />
                   </button>
                 )}
                 <button 
                   onClick={() => window.print()}
-                  className="p-1.5 md:p-2 text-stone-300 hover:text-brand-primary transition-colors"
+                  className="p-2 bg-white text-stone-300 hover:text-brand-primary rounded-full shadow-sm border border-stone-100 transition-all"
                   title="Imprimir Relatório"
                 >
-                  <Printer size={14} className="md:w-4 md:h-4" />
+                  <Printer size={16} />
                 </button>
               </div>
               <h2 className="text-stone-400 font-bold uppercase tracking-[0.15em] md:tracking-[0.2em] text-[10px] md:text-sm">Relatório Vocacional de {userInfo.name}</h2>
@@ -500,25 +547,81 @@ const App = () => {
             </div>
 
             {isAdminMode && (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 no-print">
-                <div className="p-3 md:p-4 bg-white rounded-xl md:rounded-2xl border border-stone-100 shadow-sm text-center">
-                  <h4 className="text-[8px] md:text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">Nível de Precisão</h4>
-                  <div className="text-xl md:text-2xl font-black text-brand-primary">{analysisMetrics.confidence}%</div>
-                  <div className="w-full h-1 bg-stone-100 rounded-full mt-2 overflow-hidden">
-                    <div className="h-full bg-brand-primary" style={{ width: `${analysisMetrics.confidence}%` }}></div>
+              <div className="space-y-6 no-print">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+                  <div className="p-3 md:p-4 bg-white rounded-xl md:rounded-2xl border border-stone-100 shadow-sm text-center">
+                    <h4 className="text-[8px] md:text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">Nível de Precisão</h4>
+                    <div className="text-xl md:text-2xl font-black text-brand-primary">{analysisMetrics.confidence}%</div>
+                    <div className="w-full h-1 bg-stone-100 rounded-full mt-2 overflow-hidden">
+                      <div className="h-full bg-brand-primary" style={{ width: `${analysisMetrics.confidence}%` }}></div>
+                    </div>
+                  </div>
+                  <div className="p-3 md:p-4 bg-white rounded-xl md:rounded-2xl border border-stone-100 shadow-sm text-center">
+                    <h4 className="text-[8px] md:text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">Perfil Secundário</h4>
+                    <div className="text-xs md:text-sm font-bold text-stone-700">{profiles[analysisMetrics.secondary].title}</div>
+                    <div className="text-[8px] md:text-[10px] text-stone-400 mt-0.5 md:mt-1">Forte influência nas suas escolhas</div>
+                  </div>
+                  <div className="p-3 md:p-4 bg-white rounded-xl md:rounded-2xl border border-stone-100 shadow-sm text-center">
+                    <h4 className="text-[8px] md:text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">Consistência</h4>
+                    <div className={`text-xs md:text-sm font-bold ${analysisMetrics.isConsistent ? 'text-emerald-600' : 'text-amber-600'}`}>
+                      {analysisMetrics.isConsistent ? 'Alta Convergência' : 'Perfil Multidisciplinar'}
+                    </div>
+                    <div className="text-[8px] md:text-[10px] text-stone-400 mt-0.5 md:mt-1">Baseado em Interesses vs. Habilidades</div>
                   </div>
                 </div>
-                <div className="p-3 md:p-4 bg-white rounded-xl md:rounded-2xl border border-stone-100 shadow-sm text-center">
-                  <h4 className="text-[8px] md:text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">Perfil Secundário</h4>
-                  <div className="text-xs md:text-sm font-bold text-stone-700">{profiles[analysisMetrics.secondary].title}</div>
-                  <div className="text-[8px] md:text-[10px] text-stone-400 mt-0.5 md:mt-1">Forte influência nas suas escolhas</div>
-                </div>
-                <div className="p-3 md:p-4 bg-white rounded-xl md:rounded-2xl border border-stone-100 shadow-sm text-center">
-                  <h4 className="text-[8px] md:text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">Consistência</h4>
-                  <div className={`text-xs md:text-sm font-bold ${analysisMetrics.isConsistent ? 'text-emerald-600' : 'text-amber-600'}`}>
-                    {analysisMetrics.isConsistent ? 'Alta Convergência' : 'Perfil Multidisciplinar'}
+
+                {/* Stored Results Table */}
+                <div className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
+                  <div className="p-4 border-bottom border-stone-100 bg-stone-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <h3 className="text-sm font-bold text-stone-800 uppercase tracking-wider">Histórico de Testes ({allResults.length})</h3>
+                    <div className="flex items-center gap-2">
+                      <label className="text-[10px] font-bold text-stone-400 uppercase">Filtrar:</label>
+                      <select 
+                        value={adminFilter}
+                        onChange={(e) => setAdminFilter(e.target.value)}
+                        className="text-xs p-1 rounded border border-stone-200 bg-white outline-none focus:border-brand-primary"
+                      >
+                        <option value="all">Todos</option>
+                        <option value="a">Explorador</option>
+                        <option value="b">Líder</option>
+                        <option value="c">Conector</option>
+                        <option value="d">Inovador</option>
+                      </select>
+                    </div>
                   </div>
-                  <div className="text-[8px] md:text-[10px] text-stone-400 mt-0.5 md:mt-1">Baseado em Interesses vs. Habilidades</div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-stone-50 text-stone-400 uppercase font-bold">
+                        <tr>
+                          <th className="px-4 py-3">Nome</th>
+                          <th className="px-4 py-3">Email</th>
+                          <th className="px-4 py-3">Perfil</th>
+                          <th className="px-4 py-3">Data</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-stone-100">
+                        {allResults
+                          .filter(res => adminFilter === 'all' || res.profile === adminFilter)
+                          .map((res, idx) => (
+                          <tr key={idx} className="hover:bg-stone-50 transition-colors">
+                            <td className="px-4 py-3 font-bold text-stone-700">{res.name}</td>
+                            <td className="px-4 py-3 text-stone-500">{res.email}</td>
+                            <td className="px-4 py-3">
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold text-white ${profiles[res.profile as 'a'|'b'|'c'|'d']?.color || 'bg-stone-300'}`}>
+                                {profiles[res.profile as 'a'|'b'|'c'|'d']?.title || 'N/A'}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-stone-400">{new Date(res.timestamp).toLocaleDateString()}</td>
+                          </tr>
+                        ))}
+                        {allResults.length === 0 && (
+                          <tr>
+                            <td colSpan={4} className="px-4 py-8 text-center text-stone-400 italic">Nenhum resultado armazenado ainda.</td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             )}

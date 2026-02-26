@@ -78,6 +78,9 @@ const App = () => {
       const finalScores = calculateScores(newAnswers);
       const primaryProfile = Object.entries(finalScores).sort(([, a], [, b]) => b - a)[0][0];
       saveResults(newAnswers, primaryProfile);
+      
+      // Automatically go to result page
+      setTimeout(() => setStep('result'), 500);
     }
   };
 
@@ -155,6 +158,10 @@ const App = () => {
       gap: primary[1] - secondary[1]
     };
   }, [scores, answers]);
+
+  const calculateResult = (): Profile => {
+    return profiles[analysisMetrics.primary];
+  };
 
   const consolidatedStats = useMemo(() => {
     if (!allResults.length) return null;
